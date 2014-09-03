@@ -104,7 +104,6 @@ var mock = function() {
 }
 
 var read = function(file, start, end, cb) {
-  debug('reading data start=%d to end=%d', start, end)
   var stream = file.createReadStream({start:start, end:end})
   stream.pipe(concat({encoding:'buffer'}, function(data) {
     cb(null, data)
@@ -154,8 +153,6 @@ var populate = function(that, file, header) {
     var ready = function(err) {
       if (err) return cb(err)
       if (cluster.blobs === false) return cb(null, cluster)
-
-      debug('reading cluster index=%d offset=%d', cluster.index, cluster.offset)
 
       read(file, cluster.offset, cluster.offset, function(err, compressed) {
         compressed = compressed[0]
@@ -242,7 +239,6 @@ var populate = function(that, file, header) {
       if (err) return cb(err)
 
       var stream = file.createReadStream({start:entry.offset})
-      debug('reading directory entry index=%d offset=%d', entry.index, entry.offset)
 
       var data = null
       var parse = through(function(buf, enc, next) {
