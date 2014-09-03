@@ -19,6 +19,9 @@
     "xz": "^1.0.1"
   },
   "devDependencies": {},
+  "bin": {
+    "peerwiki": "./server.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"

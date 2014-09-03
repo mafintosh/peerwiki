@@ -272,7 +272,7 @@ var connect = function() {
 
   var engine = torrents(fs.readFileSync(path.join(__dirname, 'wikipedia.torrent')), {
     storage: storage,
-    path: path.join(__dirname, 'data')
+    path: path.join(__dirname, 'peerwiki')
   })
 
   var ready = function() {
