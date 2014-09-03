@@ -16,8 +16,9 @@ wiki.on('ready', function() {
     .pipe(through.obj(function(entry, enc, cb) {
       var read = function(err, entry) {
         if (err) return cb(err)
-        if (entry.redirect !== undefined) return wiki.readDirectoryEntry({index:entry.redirect}, read)
+        if (entry.redirect !== undefined && entry.index === entry.redirect) return cb()
         if (entry.cluster === undefined) return cb()
+        if (entry.index === entry.redirect) return cb()
 
         wiki.readCluster({index:entry.cluster, blobs:false}, function(err, cluster) {
           if (err) return cb(err)
