@@ -1,0 +1,36 @@
+{
+  "name": "peerwiki",
+  "version": "0.0.0",
+  "description": "browse all of wikipedia using bittorrent",
+  "main": "index.js",
+  "dependencies": {
+    "choppa": "^1.0.1",
+    "coffee-script": "^1.8.0",
+    "concat-stream": "^1.4.6",
+    "debug": "^2.0.0",
+    "from2": "^1.2.0",
+    "level": "^0.18.0",
+    "pump": "^0.3.5",
+    "through2": "^0.6.1",
+    "thunky": "^0.1.0",
+    "torrent-individual-piece-storage": "^3.0.0",
+    "torrent-stream": "^0.15.0",
+    "varint": "^3.0.1",
+    "xz": "^1.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mafintosh/peerwiki.git"
+  },
+  "author": "Mathias Buus, @mafintosh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mafintosh/peerwiki/issues"
+  },
+  "homepage": "https://github.com/mafintosh/peerwiki"
+}
