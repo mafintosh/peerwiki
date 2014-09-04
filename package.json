@@ -5,7 +5,6 @@
   "main": "index.js",
   "dependencies": {
     "choppa": "^1.0.1",
-    "coffee-script": "^1.8.0",
     "concat-stream": "^1.4.6",
     "debug": "^2.0.0",
     "from2": "^1.2.0",
@@ -17,7 +16,7 @@
     "torrent-individual-piece-storage": "^3.0.0",
     "torrent-stream": "^0.15.0",
     "varint": "^3.0.1",
-    "xz": "^1.0.1"
+    "xz": "^1.0.3"
   },
   "devDependencies": {},
   "bin": {
@@ -25,8 +24,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "install": "cd node_modules/xz; coffee -o lib src/xz.coffee"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
