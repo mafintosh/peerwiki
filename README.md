@@ -12,6 +12,12 @@ npm install -g peerwiki
 peerwiki 9090 # starts a peerwiki server on port 9090
 ```
 
+To use a pregenerated index (will speed up page load) do
+
+```
+peerwiki 9090 --use-index
+```
+
 And open a browser on http://localhost:9090/BitTorrent
 
 ## Programmatic usage
