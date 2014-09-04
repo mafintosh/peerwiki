@@ -1,6 +1,6 @@
 {
   "name": "peerwiki",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "browse all of wikipedia using bittorrent",
   "main": "index.js",
   "dependencies": {
