@@ -12,11 +12,13 @@ npm install -g peerwiki
 peerwiki 9090 # starts a peerwiki server on port 9090
 ```
 
-To get more debug output (can useful when running it the first time you browse since it needs to some shared static assets) do
+To get more debug output do
 
 ```
 DEBUG=peerwiki peerwiki 9090
 ```
+
+This can useful the first time you starting browsing since it needs to some download some shared static assets which can result in a added latency
 
 To use a pregenerated index (will speed up page load) do
 
