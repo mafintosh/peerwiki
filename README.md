@@ -26,7 +26,11 @@ To use a pregenerated index (will speed up page load) do
 peerwiki 9090 --use-index
 ```
 
-And open a browser on http://localhost:9090/BitTorrent
+And open a browser on [http://localhost:9090/BitTorrent](http://localhost:9090/BitTorrent)
+
+## Cache
+
+When downloading articles they are cached on your local file system in `./peerwiki`.
 
 ## Programmatic usage
 

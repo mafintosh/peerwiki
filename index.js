@@ -275,12 +275,14 @@ var populate = function(that, file, header) {
   return that
 }
 
-var connect = function() {
+var connect = function(opts) {
+  if (!opts) opts = {}
+
   var that = new events.EventEmitter()
 
   var engine = torrents(fs.readFileSync(path.join(__dirname, 'wikipedia.torrent')), {
     storage: storage,
-    path: path.join(__dirname, 'peerwiki')
+    path: opts.path || 'peerwiki'
   })
 
   var ready = function() {
