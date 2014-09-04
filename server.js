@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
 var http = require('http')
+var request = require('request')
+var debug = require('debug')('peerwiki.server')
 var peerwiki = require('./')
+
+var USE_INDEX = process.argv.indexOf('--use-index') > -1
 
 var wiki = peerwiki()
 var port = Number(process.argv[2]) || 9090
@@ -31,9 +35,27 @@ wiki.on('ready', function() {
       })
     }
 
-    wiki.findBlobByUrl(url, function(err, entry) {
-      if (err) return res.end(err.message)
-      res.end(entry)
+    var fallback = function() {
+      debug('using fallback binary search for %s', url)
+      wiki.findBlobByUrl(url, function(err, entry) {
+        if (err) return res.end(err.message)
+        res.end(entry)
+      })
+    }
+
+    if (!USE_INDEX) return fallback()
+
+    request('http://178.62.147.171/'+url, {json:true}, function(err, response) {
+      var body = response.body
+      if (!body || !body.offset) return fallback()
+
+      debug('using hot index for %s', url)
+      wiki.readCluster(body, function(err, cluster) {
+        if (err) return fallback()
+        var blob = cluster.blobs[body.blob]
+        if (!blob) return fallback()
+        res.end(blob)
+      })
     })
   })
 

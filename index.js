@@ -186,6 +186,14 @@ var populate = function(that, file, header) {
     readOffset(file, header.clusterPtrPos, cluster, ready)
   }
 
+  that.readClusterEntry = function(cluster, cb) {
+    if (cluster.offset !== undefined) return cb(null, cluster)
+    readOffset(file, header.clusterPtrPos, cluster, function(err) {
+      if (err) return cb(err)
+      cb(null, cluster)
+    })
+  }
+
   that.findEntryByUrl = function(url, cb) {
     var top = header.articleCount-1
     var btm = 2
