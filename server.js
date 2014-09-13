@@ -35,18 +35,23 @@ wiki.on('ready', function() {
     }
 
     if (/\.json$/.test(url)) {
-      wiki.findEntryByUrl(url, function(err, entry) {
+      var destroy = wiki.findEntryByUrl(url, function(err, entry) {
         if (err) return res.end(err.message)
         res.end(JSON.stringify(entry))
       })
+
+      res.on('close', destroy)
     }
 
     var fallback = function() {
       debug('using fallback binary search for %s', url)
-      wiki.findBlobByUrl(url, function(err, entry) {
+
+      var destroy = wiki.findBlobByUrl(url, function(err, entry) {
         if (err) return res.end(err.message)
         res.end(entry)
       })
+
+      res.on('close', destroy)
     }
 
     if (!USE_INDEX) return fallback()
@@ -58,12 +63,15 @@ wiki.on('ready', function() {
       if (!body || !body.offset) return fallback()
 
       debug('using hot index for %s', url)
-      wiki.readCluster(body, function(err, cluster) {
+
+      var destroy = wiki.readCluster(body, function(err, cluster) {
         if (err) return fallback()
         var blob = cluster.blobs[body.blob]
         if (!blob) return fallback()
         res.end(blob)
       })
+
+      res.on('close', destroy)
     })
   })
 

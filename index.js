@@ -10,6 +10,8 @@ var storage = require('torrent-individual-piece-storage')
 var pretty = require('pretty-bytes')
 var debug = require('debug')('peerwiki')
 
+var noop = function() {}
+
 var readUInt64LE = function(buf, offset) {
   var a = buf.readUInt32LE(offset)
   var b = buf.readUInt32LE(offset+4)
@@ -109,13 +111,17 @@ var read = function(file, start, end, cb) {
   stream.pipe(concat({encoding:'buffer'}, function(data) {
     cb(null, data)
   }))
+
+  return function() {
+    stream.destroy()
+  }
 }
 
 var readOffset = function(file, offset, entry, cb) {
   var start = offset+entry.index*8
   var end = start+8-1
 
-  read(file, start, end, function(err, buf) {
+  return read(file, start, end, function(err, buf) {
     if (err) return cb(err)
     if (buf.length < 8) return cb(new Error('Not enough data'))
     entry.offset = readUInt64LE(buf, 0)
@@ -147,15 +153,30 @@ var createOffsetStream = function(file, start, cnt, opts) {
   return pump(stream, choppa(8), parse)
 }
 
+var destroyer = function() {
+  var destroyFn = noop
+  var destroy = function() {
+    debug('destroying call')
+    if (destroyFn) destroyFn()
+  }
+  destroy.set = function(fn) {
+    destroyFn = fn
+    return destroy
+  }
+  return destroy
+}
+
 var populate = function(that, file, header, engine) {
   that.header = header
 
   that.readCluster = function(cluster, cb) {
+    var destroy = destroyer()
+
     var ready = function(err) {
       if (err) return cb(err)
       if (cluster.blobs === false) return cb(null, cluster)
 
-      read(file, cluster.offset, cluster.offset, function(err, compressed) {
+      destroy.set(read(file, cluster.offset, cluster.offset, function(err, compressed) {
         compressed = compressed[0]
         debug('cluster is compressed? %s (%d)', compressed !== 0, compressed)
 
@@ -180,16 +201,28 @@ var populate = function(that, file, header, engine) {
           cluster.blobs = blobs
           cb(null, cluster)
         }))
-      })
+
+        destroy.set(function() {
+          stream.destroy()
+        })
+      }))
     }
 
-    if (cluster.offset !== undefined) return ready()
-    readOffset(file, header.clusterPtrPos, cluster, ready)
+    if (cluster.offset !== undefined) {
+      ready()
+      return destroy
+    }
+
+    return destroy.set(readOffset(file, header.clusterPtrPos, cluster, ready))
   }
 
   that.readClusterEntry = function(cluster, cb) {
-    if (cluster.offset !== undefined) return cb(null, cluster)
-    readOffset(file, header.clusterPtrPos, cluster, function(err) {
+    if (cluster.offset !== undefined) {
+      cb(null, cluster)
+      return noop
+    }
+
+    return readOffset(file, header.clusterPtrPos, cluster, function(err) {
       if (err) return cb(err)
       cb(null, cluster)
     })
@@ -206,6 +239,8 @@ var populate = function(that, file, header, engine) {
     // binary search
     debug('searching for %s started', url)
 
+    var destroy = destroyer()
+
     var search = function(btm, top) {
       var mid = ((top+btm) / 2)|0
       if (top < btm) {
@@ -213,7 +248,7 @@ var populate = function(that, file, header, engine) {
         return cb(null, null)
       }
 
-      that.readDirectoryEntry({index:mid}, function(err, entry) {
+      destroy.set(that.readDirectoryEntry({index:mid}, function(err, entry) {
         if (err) return cb(err)
 
         var murl = entry.url
@@ -223,27 +258,33 @@ var populate = function(that, file, header, engine) {
 
         if (murl > url) search(btm, mid-1)
         else search(mid+1, top)
-      })
+      }))
     }
 
     search(btm, top)
+    return destroy
   }
 
   that.findBlobByUrl = function(url, cb) {
-    that.findEntryByUrl(url, function loop(err, entry) {
+    var destroy = destroyer()
+
+    return destroy.set(that.findEntryByUrl(url, function loop(err, entry) {
       if (err) return cb(err)
       if (!entry) return cb(null, null)
-      if (entry.redirect !== undefined) return that.readDirectoryEntry({index:entry.redirect}, loop)
+      if (entry.redirect !== undefined) return destroy.set(that.readDirectoryEntry({index:entry.redirect}, loop))
 
       if (entry.cluster === undefined || entry.blob === undefined) return cb(new Error('No blob available'))
-      that.readCluster({index:entry.cluster}, function(err, cluster) {
+
+      destroy.set(that.readCluster({index:entry.cluster}, function(err, cluster) {
         if (err) return cb(err)
         cb(null, cluster.blobs[entry.blob])
-      })
-    })
+      }))
+    }))
   }
 
   that.readDirectoryEntry = function(entry, cb) {
+    var destroy = destroyer()
+
     var ready = function(err) {
       if (err) return cb(err)
 
@@ -259,10 +300,17 @@ var populate = function(that, file, header, engine) {
       })
 
       stream.pipe(parse)
+      destroy.set(function() {
+        stream.destroy()
+      })
     }
 
-    if (entry.offset !== undefined) return ready()
-    readOffset(file, header.urlPtrPos, entry, ready)
+    if (entry.offset !== undefined) {
+      ready()
+      return destroy
+    }
+
+    return destroy.set(readOffset(file, header.urlPtrPos, entry, ready))
   }
 
   that.createClusterPointerStream = function(opts) {
