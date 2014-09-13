@@ -6,6 +6,7 @@ var debug = require('debug')('peerwiki.server')
 var peerwiki = require('./')
 
 var USE_INDEX = process.argv.indexOf('--use-index') > -1
+var USE_FALLBACK = process.argv.indexOf('--no-fallback') === -1
 
 var wiki = peerwiki()
 var port = Number(process.argv[2]) || 9090
@@ -44,6 +45,12 @@ wiki.on('ready', function() {
     }
 
     var fallback = function() {
+      if (!USE_FALLBACK) {
+        res.statusCode = 404
+        res.end()
+        return
+      }
+
       debug('using fallback binary search for %s', url)
 
       var destroy = wiki.findBlobByUrl(url, function(err, entry) {
