@@ -280,10 +280,18 @@ var connect = function(opts) {
 
   var that = new events.EventEmitter()
 
-  var engine = torrents(fs.readFileSync(path.join(__dirname, 'wikipedia.torrent')), {
+  var engine = that.engine = torrents(fs.readFileSync(path.join(__dirname, 'wikipedia.torrent')), {
     storage: storage,
     path: opts.path || 'peerwiki'
   })
+
+  var active = function(wires) {
+    var result = 0
+    for (var i = 0; i < wires.length; i++) {
+      if (!wires[i].peerChoking) result++
+    }
+    return result
+  }
 
   var ready = function() {
     if (engine && engine.files) {
@@ -291,6 +299,12 @@ var connect = function(opts) {
       file.select()
     } else {
       var file = mock()
+    }
+
+    if (process.env.DEBUG) {
+      setInterval(function() {
+        debug('connected to %d/%d peers', active(engine.swarm.wires), engine.swarm.wires.length)
+      }, 5000).unref()
     }
 
     readHeader(file, function(err, header) {
