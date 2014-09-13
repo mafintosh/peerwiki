@@ -48,6 +48,8 @@ var wiki = peerwiki(function() {
   wiki.findBlobByUrl('html/B/i/t/T/BitTorrent', function(err, buf) {
     console.log(buf)
   })
+
+  wiki.listen(9091) // listen for p2p connections on port 9091
 })
 ```
 
