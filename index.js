@@ -147,7 +147,7 @@ var createOffsetStream = function(file, start, cnt, opts) {
   return pump(stream, choppa(8), parse)
 }
 
-var populate = function(that, file, header) {
+var populate = function(that, file, header, engine) {
   that.header = header
 
   that.readCluster = function(cluster, cb) {
@@ -273,6 +273,10 @@ var populate = function(that, file, header) {
     return createOffsetStream(file, header.urlPtrPos, header.articleCount, opts)
   }
 
+  that.listen = function(port) {
+    engine.listen(port)
+  }
+
   return that
 }
 
@@ -312,7 +316,7 @@ var connect = function(opts) {
     readHeader(file, function(err, header) {
       if (err) return that.emit('error', err)
       debug('succesfully fetched wikipedia header!')
-      populate(that, file, header)
+      populate(that, file, header, engine)
       that.emit('ready')
     })
   }
@@ -329,43 +333,3 @@ var connect = function(opts) {
 }
 
 module.exports = connect
-
-// var run = function() {
-//   var wiki = connect()
-//   wiki.on('ready', function() {
-//     // wiki.createEntryPointerStream().pipe(through.obj(function(entry, enc, cb) {
-//     //   wiki.readDirectoryEntry(entry, cb)
-//     // })).on('data', function(entry) {
-//     //   console.log(entry.url)
-//     // })
-
-
-
-// //    wiki.createClusterPointerStream().on('data', console.log)
-
-//     // wiki.createEntryPointerStream()
-//     //   .pipe(through.obj(function(entry, enc, cb) {
-//     //     wiki.readDirectoryEntry(entry, cb)
-//     //   }))
-//     //   .pipe(through.obj(function(entry, enc, cb) {
-//     //     console.log(entry.index+' '+entry.url)
-//     //     setImmediate(cb)
-//     //   }))
-//     //   .on('end', function() {
-//     //     console.error('FINISH!!!')
-//     //     process.exit(0)
-//     //   })
-
-// //    wiki.findBlobByUrl('style/style.css', console.log)
-// //    return
-
-//   //  wiki.readDirectoryEntry({ index: 12617, offset: 2499057084 })
-//   //  wiki.readDirectoryEntry({ index: 1, offset: 1209753436 }, console.log)
-// //    wiki.readDirectoryEntry({ index: 0, offset: 1209591107 }, console.log)
-//   })
-// }
-
-
-// //return run()
-
-

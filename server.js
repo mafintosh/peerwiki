@@ -68,6 +68,7 @@ wiki.on('ready', function() {
   })
 
   server.listen(port, function() {
+    wiki.listen(port+1)
     console.log('Server is listening on port %d', server.address().port)
   })
 })
