@@ -7,6 +7,7 @@ var path = require('path')
 var events = require('events')
 var through = require('through2')
 var storage = require('torrent-individual-piece-storage')
+var pretty = require('pretty-bytes')
 var debug = require('debug')('peerwiki')
 
 var readUInt64LE = function(buf, offset) {
@@ -303,12 +304,14 @@ var connect = function(opts) {
 
     if (process.env.DEBUG) {
       setInterval(function() {
-        debug('connected to %d/%d peers', active(engine.swarm.wires), engine.swarm.wires.length)
+        debug('connected to %d/%d (%s/s) peers', active(engine.swarm.wires), engine.swarm.wires.length, pretty(engine.swarm.downloadSpeed()))
       }, 5000).unref()
     }
 
+    debug('fetching required wikipedia header...')
     readHeader(file, function(err, header) {
       if (err) return that.emit('error', err)
+      debug('succesfully fetched wikipedia header!')
       populate(that, file, header)
       that.emit('ready')
     })

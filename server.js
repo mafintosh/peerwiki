@@ -28,6 +28,12 @@ wiki.on('ready', function() {
 
     url = url.replace(/^[a-z]\//i, '') // remove namespace
 
+    if (url === '-/style/Icons-mini-file_acrobat.gif') { // haxx - find out if this is a bug
+      res.statusCode = 404
+      res.end()
+      return
+    }
+
     if (/\.json$/.test(url)) {
       wiki.findEntryByUrl(url, function(err, entry) {
         if (err) return res.end(err.message)
