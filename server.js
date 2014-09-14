@@ -63,9 +63,8 @@ wiki.on('ready', function() {
 
     if (!USE_INDEX) return fallback()
 
-    // 178.62.147.171 is just a random server hosting a prebuilt wiki index
-    // this is not needed for peerwiki to work but it might speed things up a bit
-    request('http://178.62.147.171/'+url, {json:true}, function(err, response) {
+    // this is not needed for peerwiki to work but it might speed things up a bit (a precompiled index of the torrent)
+    request('http://peerwiki-index.mathiasbuus.eu:9999/'+url, {json:true}, function(err, response) {
       var body = response.body
       if (!body || !body.offset) return fallback()
 
