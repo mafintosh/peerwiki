@@ -349,7 +349,7 @@ var connect = function(opts) {
   var ready = function() {
     if (engine && engine.files) {
       var file = engine.files[0]
-      file.select()
+      if (!opts.onDemand) file.select()
     } else {
       var file = mock()
     }

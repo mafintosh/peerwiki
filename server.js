@@ -7,8 +7,9 @@ var peerwiki = require('./')
 
 var USE_INDEX = process.argv.indexOf('--use-index') > -1
 var USE_FALLBACK = process.argv.indexOf('--no-fallback') === -1
+var ON_DEMAND = process.argv.indexOf('--on-demand') > -1
 
-var wiki = peerwiki()
+var wiki = peerwiki({onDemand:ON_DEMAND})
 var port = Number(process.argv[2]) || 9090
 
 console.log('Verifying previously downloaded data...')
