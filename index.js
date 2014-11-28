@@ -181,7 +181,7 @@ var populate = function(that, file, header, engine) {
         debug('cluster is compressed? %s (%d)', compressed !== 0, compressed)
 
         var stream = file.createReadStream({start:cluster.offset+1, end:cluster.offset+1500000}) // haxx - TODO: fix me
-        var decomp = compressed < 2 ? through() : new (require('xz').Decompressor)
+        var decomp = compressed < 2 ? through() : new (require('lzma-native').Decompressor)
         var indexes = []
         var blobs = []
 
