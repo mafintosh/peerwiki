@@ -17,7 +17,7 @@
     "torrent-individual-piece-storage": "^3.0.0",
     "torrent-stream": "^0.15.0",
     "varint": "^3.0.1",
-    "xz": "^1.0.3"
+    "lzma-native": "^0.1.6"
   },
   "devDependencies": {},
   "bin": {
