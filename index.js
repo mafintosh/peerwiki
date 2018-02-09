@@ -180,8 +180,9 @@ var populate = function(that, file, header, engine) {
         compressed = compressed[0]
         debug('cluster is compressed? %s (%d)', compressed !== 0, compressed)
 
-        var stream = file.createReadStream({start:cluster.offset+1, end:cluster.offset+1500000}) // haxx - TODO: fix me
-        var decomp = compressed < 2 ? through() : new (require('lzma-native').Decompressor)
+	var lzma = require('lzma-native')
+        var stream = file.createReadStream({start:cluster.offset+1, end:nextCluster ? nextCluster.offset - 1 : null}) // haxx - TODO: fix me
+        var decomp = compressed < 2 ? through() : lzma.createDecompressor()
         var indexes = []
         var blobs = []
 
@@ -208,12 +209,28 @@ var populate = function(that, file, header, engine) {
       }))
     }
 
+    var nextCluster = {index: cluster.index + 1}
+
+    var readNextCluster = function (err) {
+      if (err) return cb(err)
+
+      if (nextCluster.index > header.clusterCount - 1) {
+        nextCluster = false
+	return ready()
+      }
+
+      destroy.set(readOffset(file, header.clusterPtrPos, nextCluster, function (err) {
+        if (err) return cb(err)
+	ready()
+      }))
+    }
+
     if (cluster.offset !== undefined) {
-      ready()
+      readNextCluster()
       return destroy
     }
 
-    return destroy.set(readOffset(file, header.clusterPtrPos, cluster, ready))
+    return destroy.set(readOffset(file, header.clusterPtrPos, cluster, readNextCluster))
   }
 
   that.readClusterEntry = function(cluster, cb) {
